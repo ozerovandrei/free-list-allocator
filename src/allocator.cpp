@@ -104,6 +104,9 @@ MachineWord *Allocator::New(const size_t needed_size) const {
         heap_end->Next = memory_block;
     }
 
+    // Chain blocks.
+    heap_end = memory_block;
+
     // Return new data pointer.
     return memory_block->Data;
 }
@@ -112,13 +115,7 @@ MachineWord *Allocator::New(const size_t needed_size) const {
 // Data element.
 // We remove size of the Data field since user can allocate one word.
 size_t Allocator::AllocSizeWithBlock(size_t size) const {
-    /*
-    declval returns reference type of a <MemoryBlock> so we don't need a
-    constructor.
-    https://en.cppreference.com/w/cpp/utility/declval
-    https://docs.w3cub.com/cpp/utility/declval/
-    */
-    return sizeof(MemoryBlock) + size - sizeof(std::declval<MemoryBlock>().Data);
+    return sizeof(MemoryBlock) + size - SizeOfData();
 }
 
 // NewFromOS allocates new block from OS or returns a nullptr if a new block

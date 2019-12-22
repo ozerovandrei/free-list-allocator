@@ -205,9 +205,10 @@ void TestAllocator_5(const Allocator& allocator) {
     auto block_3 = allocator.New(8);
     auto block_3_header = GetHeader(block_3);
 
-    // AssertUsedBlock(block_2_header, fail);
+    AssertAllocatedSize(block_3_header, 8, fail, test_name);
+    AssertUsedBlock(block_2_header, fail, test_name);
     AssertUsedBlock(block_3_header, fail, test_name);
-    // AssertBlocksEqual(block_2_header, block_3_header, fail);
+    AssertBlocksEqual(block_2_header, block_3_header, fail, test_name);
 
     if (!fail) {
         PrintTestPass(test_name);
