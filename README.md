@@ -6,5 +6,5 @@ allocation strategies.
 ## Compilation command (MacOS)
 
 ```
-clang++ -std=c++17 -stdlib=libc++ -O3 -Wvla-extension main.cpp
+clang++ -std=c++17 -stdlib=libc++ -O3 -Wvla-extension ./src/main.cpp
 ```
