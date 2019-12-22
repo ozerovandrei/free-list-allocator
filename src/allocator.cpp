@@ -30,6 +30,11 @@ size_t Allocator::Padding(const size_t initial_size) const {
 //  - Align(8) -> 8
 //  - Align(9) -> 16
 size_t Allocator::Align(const size_t initial_size) const {
+    // Return 0 for 0.
+    if (initial_size == 0) {
+        return 0;
+    }
+
     auto alignment = sizeof(machine_word);
 
     // If initial size is less than machine word alignment just return the
