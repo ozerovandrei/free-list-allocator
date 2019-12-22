@@ -77,33 +77,37 @@ void TestAlign(const Allocator& allocator) {
     std::cout << std::endl;
 }
 
-void AssertUsedBlock(const MemoryBlock* data, bool& fail_flag) {
+void AssertUsedBlock(const MemoryBlock* data, bool& fail_flag, const std::string& test_name) {
     if (!data->Used) {
         fail_flag = true;
+        PrintTestFail(test_name);
         std::cerr << "Expected used block but it is free" << std::endl;
     }
 }
 
-void AssertFreeBlock(const MemoryBlock* data, bool& fail_flag) {
+void AssertFreeBlock(const MemoryBlock* data, bool& fail_flag, const std::string& test_name) {
     if (data->Used) {
         fail_flag = true;
+        PrintTestFail(test_name);
         std::cerr << "Expected free block but it is in use" << std::endl;
     }
 }
 
-void AssertAllocatedSize(const MemoryBlock* data, size_t expected_size, bool& fail_flag) {
+void AssertAllocatedSize(const MemoryBlock* data, size_t expected_size, bool& fail_flag, const std::string& test_name) {
     auto actual_size = data->Size;
 
     if (actual_size != expected_size) {
         fail_flag = true;
+        PrintTestFail(test_name);
         std::cerr << "Expected " << expected_size
         << ", but got: " << actual_size << std::endl;
     }
 }
 
-void AssertBlocksEqual(const MemoryBlock* a, const MemoryBlock* b, bool& fail_flag) {
+void AssertBlocksEqual(const MemoryBlock* a, const MemoryBlock* b, bool& fail_flag, const std::string& test_name) {
     if (a != b) {
         fail_flag = true;
+        PrintTestFail(test_name);
         std::cerr << "Memory blocks aren't equal" << std::endl;
     }
 }
@@ -116,8 +120,8 @@ void TestAllocator_1(const Allocator& allocator) {
     auto block = allocator.New(3);
     auto block_header = GetHeader(block);
 
-    AssertUsedBlock(block_header, fail);
-    AssertAllocatedSize(block_header, sizeof(MachineWord), fail);
+    AssertUsedBlock(block_header, fail, test_name);
+    AssertAllocatedSize(block_header, sizeof(MachineWord), fail, test_name);
 
     if (!fail) {
         PrintTestPass(test_name);
@@ -134,8 +138,8 @@ void TestAllocator_2(const Allocator& allocator) {
     auto block = allocator.New(8);
     auto block_header = GetHeader(block);
 
-    AssertUsedBlock(block_header, fail);
-    AssertAllocatedSize(block_header, 8, fail);
+    AssertUsedBlock(block_header, fail, test_name);
+    AssertAllocatedSize(block_header, 8, fail, test_name);
 
     if (!fail) {
         PrintTestPass(test_name);
@@ -152,8 +156,8 @@ void TestAllocator_3(const Allocator& allocator) {
     auto block = allocator.New(12);
     auto block_header = GetHeader(block);
 
-    AssertUsedBlock(block_header, fail);
-    AssertAllocatedSize(block_header, 16, fail);
+    AssertUsedBlock(block_header, fail, test_name);
+    AssertAllocatedSize(block_header, 16, fail, test_name);
 
     if (!fail) {
         PrintTestPass(test_name);
@@ -171,7 +175,7 @@ void TestAllocator_4(const Allocator& allocator) {
     auto block_header = GetHeader(block);
     allocator.Free(block);
 
-    AssertFreeBlock(block_header, fail);
+    AssertFreeBlock(block_header, fail, test_name);
 
     if (!fail) {
         PrintTestPass(test_name);
@@ -190,19 +194,19 @@ void TestAllocator_5(const Allocator& allocator) {
     auto block_1_header = GetHeader(block_1);
     auto block_2_header = GetHeader(block_2);
 
-    AssertUsedBlock(block_1_header, fail);
-    AssertUsedBlock(block_2_header, fail);
-    AssertAllocatedSize(block_1_header, 16, fail);
-    AssertAllocatedSize(block_2_header, 8, fail);
+    AssertUsedBlock(block_1_header, fail, test_name);
+    AssertUsedBlock(block_2_header, fail, test_name);
+    AssertAllocatedSize(block_1_header, 16, fail, test_name);
+    AssertAllocatedSize(block_2_header, 8, fail, test_name);
 
     allocator.Free(block_2);
-    AssertFreeBlock(block_2_header, fail);
+    AssertFreeBlock(block_2_header, fail, test_name);
 
     auto block_3 = allocator.New(8);
     auto block_3_header = GetHeader(block_3);
 
     // AssertUsedBlock(block_2_header, fail);
-    AssertUsedBlock(block_3_header, fail);
+    AssertUsedBlock(block_3_header, fail, test_name);
     // AssertBlocksEqual(block_2_header, block_3_header, fail);
 
     if (!fail) {
