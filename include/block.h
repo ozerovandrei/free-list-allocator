@@ -18,4 +18,4 @@ struct MemoryBlock {
 
 size_t SizeOfData();
 
-MemoryBlock* GetHeader(MachineWord *data);
+MemoryBlock* GetHeader(const MachineWord *data);

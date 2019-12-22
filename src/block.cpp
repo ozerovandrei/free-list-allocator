@@ -14,6 +14,6 @@ size_t SizeOfData() {
 }
 
 // GetHeader returns a header to the needed object.
-MemoryBlock* GetHeader(MachineWord *data) {
+MemoryBlock* GetHeader(const MachineWord *data) {
     return (MemoryBlock *)((char *)data + SizeOfData() - sizeof(MemoryBlock));
 }

@@ -76,3 +76,138 @@ void TestAlign(const Allocator& allocator) {
 
     std::cout << std::endl;
 }
+
+void AssertUsedBlock(const MemoryBlock* data, bool& fail_flag) {
+    if (!data->Used) {
+        fail_flag = true;
+        std::cerr << "Expected used block but it is free" << std::endl;
+    }
+}
+
+void AssertFreeBlock(const MemoryBlock* data, bool& fail_flag) {
+    if (data->Used) {
+        fail_flag = true;
+        std::cerr << "Expected free block but it is in use" << std::endl;
+    }
+}
+
+void AssertAllocatedSize(const MemoryBlock* data, size_t expected_size, bool& fail_flag) {
+    auto actual_size = data->Size;
+
+    if (actual_size != expected_size) {
+        fail_flag = true;
+        std::cerr << "Expected " << expected_size
+        << ", but got: " << actual_size << std::endl;
+    }
+}
+
+void AssertBlocksEqual(const MemoryBlock* a, const MemoryBlock* b, bool& fail_flag) {
+    if (a != b) {
+        fail_flag = true;
+        std::cerr << "Memory blocks aren't equal" << std::endl;
+    }
+}
+
+void TestAllocator_1(const Allocator& allocator) {
+    std::string test_name = "TestAllocator_1";
+    bool fail = false;
+    PrintTestRunning(test_name);
+
+    auto block = allocator.New(3);
+    auto block_header = GetHeader(block);
+
+    AssertUsedBlock(block_header, fail);
+    AssertAllocatedSize(block_header, sizeof(MachineWord), fail);
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
+
+void TestAllocator_2(const Allocator& allocator) {
+    std::string test_name = "TestAllocator_2";
+    bool fail = false;
+    PrintTestRunning(test_name);
+
+    auto block = allocator.New(8);
+    auto block_header = GetHeader(block);
+
+    AssertUsedBlock(block_header, fail);
+    AssertAllocatedSize(block_header, 8, fail);
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
+
+void TestAllocator_3(const Allocator& allocator) {
+    std::string test_name = "TestAllocator_3";
+    bool fail = false;
+    PrintTestRunning(test_name);
+
+    auto block = allocator.New(12);
+    auto block_header = GetHeader(block);
+
+    AssertUsedBlock(block_header, fail);
+    AssertAllocatedSize(block_header, 16, fail);
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
+
+void TestAllocator_4(const Allocator& allocator) {
+    std::string test_name = "TestAllocator_4";
+    bool fail = false;
+    PrintTestRunning(test_name);
+
+    auto block = allocator.New(12);
+    auto block_header = GetHeader(block);
+    allocator.Free(block);
+
+    AssertFreeBlock(block_header, fail);
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
+
+void TestAllocator_5(const Allocator& allocator) {
+    std::string test_name = "TestAllocator_5";
+    bool fail = false;
+    PrintTestRunning(test_name);
+
+    auto block_1 = allocator.New(12);
+    auto block_2 = allocator.New(6);
+    auto block_1_header = GetHeader(block_1);
+    auto block_2_header = GetHeader(block_2);
+
+    AssertUsedBlock(block_1_header, fail);
+    AssertUsedBlock(block_2_header, fail);
+    AssertAllocatedSize(block_1_header, 16, fail);
+    AssertAllocatedSize(block_2_header, 8, fail);
+
+    allocator.Free(block_2);
+    AssertFreeBlock(block_2_header, fail);
+
+    auto block_3 = allocator.New(8);
+    auto block_3_header = GetHeader(block_3);
+
+    // AssertUsedBlock(block_2_header, fail);
+    AssertUsedBlock(block_3_header, fail);
+    // AssertBlocksEqual(block_2_header, block_3_header, fail);
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
