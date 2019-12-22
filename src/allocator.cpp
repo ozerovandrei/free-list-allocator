@@ -1,11 +1,13 @@
 #pragma once
 
+// sbrk is deprecated on MacOS clang++ so we need to add those lines.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 #include <unistd.h>
 
+#include "block.cpp"
 #include "../include/allocator.h"
-
-// machine_word represents a size to which all allocations should be aligned.
-using machine_word = uintptr_t;
 
 // Allocator constructor.
 Allocator::Allocator(const AllocationAlgorithm algorithm) {
@@ -15,7 +17,7 @@ Allocator::Allocator(const AllocationAlgorithm algorithm) {
 // Padding calculates the size that is needed to align the provided initial
 // size with the machine word.
 size_t Allocator::Padding(const size_t initial_size) const {
-    auto alignment = sizeof(machine_word);
+    auto alignment = sizeof(MachineWord);
 
     size_t multiplier = (initial_size / alignment) + 1;
     size_t aligned_size = multiplier * alignment;
@@ -35,7 +37,7 @@ size_t Allocator::Align(const size_t initial_size) const {
         return 0;
     }
 
-    auto alignment = sizeof(machine_word);
+    auto alignment = sizeof(MachineWord);
 
     // If initial size is less than machine word alignment just return the
     // machine word alignment.
@@ -55,7 +57,7 @@ size_t Allocator::Align(const size_t initial_size) const {
     // to the machine word.
     if (padding < initial_size) {
         auto difference = initial_size - padding;
-        auto alignment = sizeof(machine_word);
+        auto alignment = sizeof(MachineWord);
 
         if (difference % alignment > 0) {
             return padding + initial_size;
@@ -66,4 +68,192 @@ size_t Allocator::Align(const size_t initial_size) const {
 
     // Padding is bigger than initial size - just return their sum.
     return initial_size + padding;
+}
+
+// heap_start contains pointer to the start of the heap and it is only updated
+// on the very first allocation.
+MemoryBlock *heap_start = nullptr;
+
+// heap_end points to the current end of the heap and it's updated on the new
+// allocation from the OS.
+MemoryBlock *heap_end = heap_start;
+
+// New allocates new block of memory from OS of at least needed_size bytes.
+MachineWord *Allocator::New(const size_t needed_size) const {
+    auto size = Allocator::Align(needed_size);
+    MemoryBlock *memory_block;
+
+    // Search for the needed size of a block in the free-list.
+    memory_block = Allocator::FindBlock(size);
+    if (memory_block) {
+        return memory_block->Data;
+    }
+
+    // Allocate a new block if we can't find a block in the free-list.
+    memory_block = Allocator::NewFromOS(size);
+    memory_block->Size = size;
+    memory_block->Used = true;
+
+    // Update information about heap start if it's a new allocation.
+    if (heap_start == nullptr) {
+        heap_start = memory_block;
+    }
+
+    // Update information about heap end.
+    if (heap_end != nullptr) {
+        heap_end->Next = memory_block;
+    }
+
+    // Return new data pointer.
+    return memory_block->Data;
+}
+
+// AllocSizeWithBlock returns allocation size plus MemoryBlock header and first
+// Data element.
+// We remove size of the Data field since user can allocate one word.
+size_t Allocator::AllocSizeWithBlock(size_t size) const {
+    /*
+    declval returns reference type of a <MemoryBlock> so we don't need a
+    constructor.
+    https://en.cppreference.com/w/cpp/utility/declval
+    https://docs.w3cub.com/cpp/utility/declval/
+    */
+    return sizeof(MemoryBlock) + size - sizeof(std::declval<MemoryBlock>().Data);
+}
+
+// NewFromOS allocates new block from OS or returns a nullptr if a new block
+// can't be allocated (memory error).
+MemoryBlock *Allocator::NewFromOS(const size_t size) const {
+    // Get the current heap end via sbrk: https://linux.die.net/man/2/sbrk
+    auto memory_block = (MemoryBlock *)sbrk(0);
+
+    // Memory error.
+    if (sbrk(AllocSizeWithBlock(size)) == (void *)-1) {
+        return nullptr;
+    }
+
+    return memory_block;
+}
+
+// FindBlock searches for the next free block that can be used.
+// It uses different algorithm based on selected algorithm of the allocator.
+MemoryBlock *Allocator::FindBlock(const size_t size) const {
+    switch (algorithm_) {
+        case AllocationAlgorithm::FIRST_FIT:
+            return FirstFit(size);
+        case AllocationAlgorithm::NEXT_FIT:
+            return NextFit(size);
+        case AllocationAlgorithm::BEST_FIT:
+            return BestFit(size);
+    }
+}
+
+/*
+FirstFit will use the first cell it finds that can satisfy the request.
+
+Pseudo-code:
+
+firstFitAllocate(n):
+    prev <- addressOf(head)
+    loop
+        curr <- next(prev)
+        if curr == null
+            return null
+        else if size(curr) < n
+            prev <- curr
+        else
+            return listAllocate(prev, curr, n)
+
+listAllocate(prev, curr, n):
+    result <- curr
+    if shouldSplit(size(curr), n)
+        remainder <- result + n
+        next(remainder) <- next(curr)
+        size(remainder) <- size(curr) - n
+        next(prev) <- next(curr)
+    else
+        next(prev) <- next(curr)
+    return result
+*/
+MemoryBlock *Allocator::FirstFit(size_t size) const {
+    auto memory_block = heap_start;
+
+    while (memory_block != nullptr) {
+        if (memory_block->Used || memory_block->Size < size) {
+            memory_block = memory_block->Next;
+            continue;
+        }
+
+        // Found the needed block.
+        memory_block->Used = true;
+        memory_block->Size = size;
+
+        return memory_block;
+    }
+
+    return nullptr;
+}
+
+/*
+NextFit is a variation of first-fit that starts the search for a cell of
+suitable size from the point in the list where the last search succeeded.
+
+Pseudo-code:
+
+nextFitAllocate(n):
+    start <- prev
+    loop
+        curr <- next(prev)
+        if curr == null
+            prev <- addressOf(head)
+            curr <- next
+        if prev = start
+            return null
+        else if size(curr) < n
+            prev <- curr
+        else
+            return listAllocate(prev, curr, n)
+*/
+MemoryBlock *Allocator::NextFit(size_t size) const {
+    // Not implemented.
+    return nullptr;
+}
+
+/*
+Best-fit allocation finds the cell whose size most closely matches the request.
+The idea is to minimise waste, as well as to avoid splitting large cells
+unnecessarily.
+
+Pseudo-code:
+
+bestFitAllocate(n):
+    best <- null
+    bestSize <- INFINITY
+    prev <- addressOf(head)
+    loop
+        curr <- next(prev)
+        if curr == null || size(curr) = n
+            if curr != null
+                bestPrev <- prev
+                best <- curr
+            else if best = null
+                return null
+            return listAllocate(bestPrev, best, n)
+        else if size(curr) < n || bestSize < size(curr)
+            prev <- curr
+        else
+            best <- curr
+            bestPrev <- prev
+            bestSize <- size(curr)
+*/
+MemoryBlock *Allocator::BestFit(size_t size) const {
+    // Not implemented.
+    return nullptr;
+}
+
+// Free deallocates previously created MemoryBlock.
+void Allocator::Free(MachineWord *data) const {
+    auto memory_block = GetHeader(data);
+
+    memory_block->Used = false;
 }
