@@ -78,6 +78,9 @@ MemoryBlock *heap_start = nullptr;
 // allocation from the OS.
 MemoryBlock *heap_end = heap_start;
 
+// next_fit_start_block points to the block that should be used in the NextFit.
+MemoryBlock *next_fit_start_block = heap_start;
+
 // New allocates new block of memory from OS of at least needed_size bytes.
 MachineWord *Allocator::New(const size_t needed_size) const {
     auto size = Allocator::Align(needed_size);
@@ -178,6 +181,8 @@ MemoryBlock *Allocator::FirstFit(size_t size) const {
     while (memory_block != nullptr) {
         if (memory_block->Used || memory_block->Size < size) {
             memory_block = memory_block->Next;
+
+            // Check the next block.
             continue;
         }
 
@@ -212,7 +217,43 @@ nextFitAllocate(n):
             return listAllocate(prev, curr, n)
 */
 MemoryBlock *Allocator::NextFit(size_t size) const {
-    // Not implemented.
+    // Reset start block to start of the heap if it's empty.
+    if (next_fit_start_block == nullptr) {
+        next_fit_start_block = heap_start;
+    }
+
+    // Initial start block to check for cycles.
+    auto initial_start_block = next_fit_start_block;
+
+    // Result memory block.
+    auto memory_block = initial_start_block;
+
+    while (memory_block != nullptr) {
+        if (memory_block->Used || memory_block->Size < size) {
+            memory_block = memory_block->Next;
+
+            // Return to the begining of the list since we use circular first-fit
+            // allocation.
+            if (memory_block == nullptr) {
+                memory_block = heap_start;
+            }
+
+            // Initial start block and current block are equal => cycle.
+            if (memory_block == initial_start_block) {
+                break;
+            }
+
+            // Check the next block.
+            continue;
+        }
+
+        // Found the needed block.
+        memory_block->Used = true;
+        memory_block->Size = size;
+
+        return memory_block;
+    }
+
     return nullptr;
 }
 
