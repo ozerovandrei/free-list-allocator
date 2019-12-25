@@ -6,7 +6,7 @@
 
 class Allocator {
 public:
-    enum AllocationAlgorithm {
+    enum class AllocationAlgorithm {
         FIRST_FIT,
         NEXT_FIT,
         BEST_FIT
