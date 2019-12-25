@@ -10,9 +10,7 @@
 #include "../include/allocator.h"
 
 // Allocator constructor.
-Allocator::Allocator(const AllocationAlgorithm algorithm) {
-    algorithm_ = algorithm;
-}
+Allocator::Allocator(const AllocationAlgorithm algorithm) : algorithm_(algorithm) {}
 
 // Padding calculates the size that is needed to align the provided initial
 // size with the machine word.
