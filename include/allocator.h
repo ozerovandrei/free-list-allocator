@@ -29,6 +29,12 @@ public:
     MemoryBlock *BestFit(size_t size) const noexcept;
 
     void Free(MachineWord *data) const noexcept;
+
+    // Disable move and copy semantics.
+    Allocator(const Allocator&) = delete;
+    Allocator(Allocator&&) = delete;
+    Allocator& operator=(const Allocator&) = delete;
+    Allocator& operator=(Allocator&&) = delete;
 private:
     AllocationAlgorithm algorithm_;
 
