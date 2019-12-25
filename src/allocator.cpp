@@ -68,17 +68,6 @@ size_t Allocator::Align(size_t initial_size) noexcept {
     return initial_size + padding;
 }
 
-// heap_start contains pointer to the start of the heap and it is only updated
-// on the very first allocation.
-MemoryBlock *heap_start = nullptr;
-
-// heap_end points to the current end of the heap and it's updated on the new
-// allocation from the OS.
-MemoryBlock *heap_end = heap_start;
-
-// next_fit_start_block points to the block that should be used in the NextFit.
-MemoryBlock *next_fit_start_block = heap_start;
-
 // New allocates new block of memory from OS of at least needed_size bytes.
 MachineWord *Allocator::New(size_t needed_size) noexcept {
     auto size = Allocator::Align(needed_size);
@@ -96,17 +85,17 @@ MachineWord *Allocator::New(size_t needed_size) noexcept {
     memory_block->Used = true;
 
     // Update information about heap start if it's a new allocation.
-    if (heap_start == nullptr) {
-        heap_start = memory_block;
+    if (heap_start_ == nullptr) {
+        heap_start_ = memory_block;
     }
 
     // Update information about heap end.
-    if (heap_end != nullptr) {
-        heap_end->Next = memory_block;
+    if (heap_end_ != nullptr) {
+        heap_end_->Next = memory_block;
     }
 
     // Chain blocks.
-    heap_end = memory_block;
+    heap_end_ = memory_block;
 
     // Return new data pointer.
     return memory_block->Data;
@@ -135,7 +124,7 @@ MemoryBlock *Allocator::NewFromOS(size_t size) noexcept {
 
 // FindBlock searches for the next free block that can be used.
 // It uses different algorithm based on selected algorithm of the allocator.
-MemoryBlock *Allocator::FindBlock(size_t size) const noexcept {
+MemoryBlock *Allocator::FindBlock(size_t size) noexcept {
     switch (algorithm_) {
         case AllocationAlgorithm::FIRST_FIT:
             return FirstFit(size);
@@ -174,7 +163,7 @@ listAllocate(prev, curr, n):
     return result
 */
 MemoryBlock *Allocator::FirstFit(size_t size) const noexcept {
-    auto memory_block = heap_start;
+    auto memory_block = heap_start_;
 
     while (memory_block != nullptr) {
         if (memory_block->Used || memory_block->Size < size) {
@@ -214,14 +203,14 @@ nextFitAllocate(n):
         else
             return listAllocate(prev, curr, n)
 */
-MemoryBlock *Allocator::NextFit(size_t size) const noexcept {
+MemoryBlock *Allocator::NextFit(size_t size) noexcept {
     // Reset start block to start of the heap if it's empty.
-    if (next_fit_start_block == nullptr) {
-        next_fit_start_block = heap_start;
+    if (next_fit_start_block_ == nullptr) {
+        next_fit_start_block_ = heap_start_;
     }
 
     // Initial start block to check for cycles.
-    auto initial_start_block = next_fit_start_block;
+    auto initial_start_block = next_fit_start_block_;
 
     // Result memory block.
     auto memory_block = initial_start_block;
@@ -233,7 +222,7 @@ MemoryBlock *Allocator::NextFit(size_t size) const noexcept {
             // Return to the begining of the list since we use circular first-fit
             // allocation.
             if (memory_block == nullptr) {
-                memory_block = heap_start;
+                memory_block = heap_start_;
             }
 
             // Initial start block and current block are equal => cycle.
