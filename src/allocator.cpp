@@ -14,7 +14,7 @@ Allocator::Allocator(AllocationAlgorithm algorithm) : algorithm_(algorithm) {}
 
 // Padding calculates the size that is needed to align the provided initial
 // size with the machine word.
-size_t Allocator::Padding(size_t initial_size) const noexcept {
+size_t Allocator::Padding(size_t initial_size) noexcept {
     auto alignment = sizeof(MachineWord);
 
     size_t multiplier = (initial_size / alignment) + 1;
@@ -29,7 +29,7 @@ size_t Allocator::Padding(size_t initial_size) const noexcept {
 //  - Align(3) -> 8
 //  - Align(8) -> 8
 //  - Align(9) -> 16
-size_t Allocator::Align(size_t initial_size) const noexcept {
+size_t Allocator::Align(size_t initial_size) noexcept {
     // Return 0 for 0.
     if (initial_size == 0) {
         return 0;
@@ -80,7 +80,7 @@ MemoryBlock *heap_end = heap_start;
 MemoryBlock *next_fit_start_block = heap_start;
 
 // New allocates new block of memory from OS of at least needed_size bytes.
-MachineWord *Allocator::New(size_t needed_size) const noexcept {
+MachineWord *Allocator::New(size_t needed_size) noexcept {
     auto size = Allocator::Align(needed_size);
     MemoryBlock *memory_block;
 
@@ -115,13 +115,13 @@ MachineWord *Allocator::New(size_t needed_size) const noexcept {
 // AllocSizeWithBlock returns allocation size plus MemoryBlock header and first
 // Data element.
 // We remove size of the Data field since user can allocate one word.
-size_t Allocator::AllocSizeWithBlock(size_t size) const noexcept {
+size_t Allocator::AllocSizeWithBlock(size_t size) noexcept {
     return sizeof(MemoryBlock) + size - SizeOfData();
 }
 
 // NewFromOS allocates new block from OS or returns a nullptr if a new block
 // can't be allocated (memory error).
-MemoryBlock *Allocator::NewFromOS(size_t size) const noexcept {
+MemoryBlock *Allocator::NewFromOS(size_t size) noexcept {
     // Get the current heap end via sbrk: https://linux.die.net/man/2/sbrk
     auto memory_block = (MemoryBlock *)sbrk(0);
 

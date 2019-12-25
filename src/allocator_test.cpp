@@ -112,7 +112,7 @@ void AssertBlocksEqual(const MemoryBlock* a, const MemoryBlock* b, bool& fail_fl
     }
 }
 
-void TestAllocator_common_1(const Allocator& allocator) {
+void TestAllocator_common_1(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_1";
     bool fail = false;
     PrintTestRunning(test_name);
@@ -130,7 +130,7 @@ void TestAllocator_common_1(const Allocator& allocator) {
     std::cout << std::endl;
 }
 
-void TestAllocator_common_2(const Allocator& allocator) {
+void TestAllocator_common_2(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_2";
     bool fail = false;
     PrintTestRunning(test_name);
@@ -148,7 +148,7 @@ void TestAllocator_common_2(const Allocator& allocator) {
     std::cout << std::endl;
 }
 
-void TestAllocator_common_3(const Allocator& allocator) {
+void TestAllocator_common_3(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_3";
     bool fail = false;
     PrintTestRunning(test_name);
@@ -166,7 +166,7 @@ void TestAllocator_common_3(const Allocator& allocator) {
     std::cout << std::endl;
 }
 
-void TestAllocator_common_4(const Allocator& allocator) {
+void TestAllocator_common_4(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_4";
     bool fail = false;
     PrintTestRunning(test_name);
@@ -184,7 +184,7 @@ void TestAllocator_common_4(const Allocator& allocator) {
     std::cout << std::endl;
 }
 
-void TestAllocator_common_5(const Allocator& allocator) {
+void TestAllocator_common_5(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_5";
     bool fail = false;
     PrintTestRunning(test_name);
@@ -218,7 +218,7 @@ void TestAllocator_common_5(const Allocator& allocator) {
     std::cout << std::endl;
 }
 
-void TestAllocator_next_fit_1(const Allocator& allocator) {
+void TestAllocator_next_fit_1(Allocator& allocator) {
     std::string test_name = "TestAllocator_next_fit_1";
     bool fail = false;
     PrintTestRunning(test_name);
@@ -261,7 +261,7 @@ void TestAllocator_next_fit_1(const Allocator& allocator) {
     std::cout << std::endl;
 }
 
-void TestAllocator_next_fit_2(const Allocator& allocator) {
+void TestAllocator_next_fit_2(Allocator& allocator) {
     std::string test_name = "TestAllocator_next_fit_2";
     bool fail = false;
     PrintTestRunning(test_name);
