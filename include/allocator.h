@@ -26,12 +26,14 @@ public:
     static MemoryBlock *NewFromOS(size_t size) noexcept;
     static MemoryBlock *SplitBlock(MemoryBlock *block, size_t size) noexcept;
 
+    MemoryBlock *MergeBlocks(MemoryBlock *block) noexcept;
+
     MemoryBlock *ListAllocate(MemoryBlock *block, size_t size) const noexcept;
     MemoryBlock *FirstFit(size_t size) const noexcept;
     MemoryBlock *NextFit(size_t size) noexcept;
     MemoryBlock *BestFit(size_t size) const noexcept;
 
-    void Free(MachineWord *data) const noexcept;
+    void Free(MachineWord *data) noexcept;
 
     // Disable move and copy semantics.
     Allocator(const Allocator&) = delete;
@@ -48,6 +50,9 @@ private:
     // heap_end points to the current end of the heap and it's updated on the new
     // allocation from the OS.
     MemoryBlock *heap_end_;
+
+    // last_allocated_block_ points to the last allocated block.
+    MemoryBlock *last_allocated_block_;
 
     // next_fit_start_block points to the block that should be used in the NextFit.
     MemoryBlock *next_fit_start_block_;

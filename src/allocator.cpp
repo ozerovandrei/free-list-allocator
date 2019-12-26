@@ -14,6 +14,7 @@ Allocator::Allocator(AllocationAlgorithm algorithm) :
 algorithm_(algorithm),
 heap_start_(nullptr) {
     heap_end_ = heap_start_;
+    last_allocated_block_ = heap_start_;
     next_fit_start_block_ = heap_start_;
 }
 
@@ -29,6 +30,7 @@ Allocator::~Allocator() {
 
     heap_start_ = nullptr;
     heap_end_ = nullptr;
+    last_allocated_block_ = nullptr;
     next_fit_start_block_ = nullptr;
 }
 
@@ -331,9 +333,29 @@ MemoryBlock *Allocator::BestFit(size_t size) const noexcept {
     return nullptr;
 }
 
+// MergeBlocks merges the selected block with the next one.
+MemoryBlock *Allocator::MergeBlocks(MemoryBlock *block) noexcept {
+    // Next block could be last allocated block - update that pointer.
+    if (block->Next == last_allocated_block_) {
+        last_allocated_block_ = block;
+    }
+
+    // Merge blocks.
+    block->Size += block->Next->Size;
+    block->Next = block->Next->Next;
+
+    return block;
+}
+
 // Free deallocates previously created MemoryBlock.
-void Allocator::Free(MachineWord *data) const noexcept {
+void Allocator::Free(MachineWord *data) noexcept {
     auto memory_block = GetHeader(data);
+
+    // Merge the found block with the next one if next block is exist and it's
+    // not used.
+    if (memory_block->Next && !memory_block->Next->Used) {
+        MergeBlocks(memory_block);
+    }
 
     memory_block->Used = false;
 }
