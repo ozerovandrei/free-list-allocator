@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <string>
 
 #include "block.h"
 
@@ -14,6 +15,8 @@ public:
 
     Allocator(AllocationAlgorithm algorithm);
     ~Allocator();
+
+    std::string Algorithm() const noexcept;
 
     static size_t Padding(size_t initial_size) noexcept;
     static size_t Align(size_t initial_size) noexcept;

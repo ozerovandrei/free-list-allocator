@@ -34,6 +34,18 @@ Allocator::~Allocator() {
     next_fit_start_block_ = nullptr;
 }
 
+// Return algorithm type.
+std::string Allocator::Algorithm() const noexcept {
+    switch (algorithm_) {
+        case AllocationAlgorithm::FIRST_FIT:
+            return "first fit";
+        case AllocationAlgorithm::NEXT_FIT:
+            return "next fit";
+        case AllocationAlgorithm::BEST_FIT:
+            return "best fit";
+    }
+}
+
 // Padding calculates the size that is needed to align the provided initial
 // size with the machine word.
 size_t Allocator::Padding(size_t initial_size) noexcept {
@@ -230,10 +242,6 @@ MemoryBlock *Allocator::FirstFit(size_t size) const noexcept {
 
         // Found the needed block.
         return ListAllocate(memory_block, size);
-        // memory_block->Used = true;
-        // memory_block->Size = size;
-
-        // return memory_block;
     }
 
     return nullptr;
@@ -291,11 +299,8 @@ MemoryBlock *Allocator::NextFit(size_t size) noexcept {
         }
 
         // Found the needed block.
+        next_fit_start_block_ = memory_block;
         return ListAllocate(memory_block, size);
-        // memory_block->Used = true;
-        // memory_block->Size = size;
-
-        // return memory_block;
     }
 
     return nullptr;

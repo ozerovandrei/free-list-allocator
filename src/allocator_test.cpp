@@ -4,8 +4,9 @@
 
 #include "allocator.cpp"
 
-void PrintTestRunning(const std::string& test_name) {
-    std::cout << "=== RUN " << test_name << std::endl;
+void PrintTestRunning(const std::string& test_name, const Allocator& allocator) {
+    std::cout << "=== RUN " << test_name << " for the "
+    << allocator.Algorithm() << " algorithm" << std::endl;
 }
 
 void PrintTestPass(const std::string& test_name) {
@@ -19,7 +20,7 @@ void PrintTestFail(const std::string& test_name) {
 void TestPadding(const Allocator& allocator) {
     std::string test_name = "TestPadding";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     size_t initial_sizes[35] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
         15, 16, 21, 22, 23, 24, 32, 36, 40, 42, 47, 48, 60, 62, 63, 64, 65,
@@ -49,7 +50,7 @@ void TestPadding(const Allocator& allocator) {
 void TestAlign(const Allocator& allocator) {
     std::string test_name = "TestAlign";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     size_t initial_sizes[35] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
         15, 16, 21, 22, 23, 24, 32, 36, 40, 42, 47, 48, 60, 62, 63, 64, 65,
@@ -115,7 +116,7 @@ void AssertBlocksEqual(const MemoryBlock* a, const MemoryBlock* b, bool& fail_fl
 void TestAllocator_common_1(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_1";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     auto block = allocator.New(3);
     auto block_header = GetHeader(block);
@@ -133,7 +134,7 @@ void TestAllocator_common_1(Allocator& allocator) {
 void TestAllocator_common_2(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_2";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     auto block = allocator.New(8);
     auto block_header = GetHeader(block);
@@ -151,7 +152,7 @@ void TestAllocator_common_2(Allocator& allocator) {
 void TestAllocator_common_3(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_3";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     auto block = allocator.New(12);
     auto block_header = GetHeader(block);
@@ -169,7 +170,7 @@ void TestAllocator_common_3(Allocator& allocator) {
 void TestAllocator_common_4(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_4";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     auto block = allocator.New(12);
     auto block_header = GetHeader(block);
@@ -187,7 +188,7 @@ void TestAllocator_common_4(Allocator& allocator) {
 void TestAllocator_common_5(Allocator& allocator) {
     std::string test_name = "TestAllocator_common_5";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     auto block_1 = allocator.New(12);
     auto block_2 = allocator.New(6);
@@ -221,7 +222,7 @@ void TestAllocator_common_5(Allocator& allocator) {
 void TestAllocator_next_fit_1(Allocator& allocator) {
     std::string test_name = "TestAllocator_next_fit_1";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     auto block_1 = allocator.New(3);
     auto block_2 = allocator.New(4);
@@ -264,7 +265,7 @@ void TestAllocator_next_fit_1(Allocator& allocator) {
 void TestAllocator_next_fit_2(Allocator& allocator) {
     std::string test_name = "TestAllocator_next_fit_2";
     bool fail = false;
-    PrintTestRunning(test_name);
+    PrintTestRunning(test_name, allocator);
 
     auto block_1 = allocator.New(16);
     auto block_2 = allocator.New(15);
