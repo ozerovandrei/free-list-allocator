@@ -191,7 +191,7 @@ MemoryBlock *Allocator::FindBlock(size_t size) noexcept {
 MemoryBlock *Allocator::ListAllocate(MemoryBlock *block, size_t size) const noexcept {
     // We can't split block if requested size is smaller than allocated size for
     // a new block.
-    if (sizeof(block) <= AllocSizeWithBlock(block->Size) - size) {
+    if (sizeof(MemoryBlock) <= (AllocSizeWithBlock(block->Size) - size)) {
         block = SplitBlock(block, size);
     }
 

@@ -36,6 +36,10 @@ int main() {
             auto allocator = Allocator(algorithms[i]);
             TestAllocator_common_5(allocator);
         }
+        {
+            auto allocator = Allocator(algorithms[i]);
+            TestAllocator_common_6(allocator);
+        }
     }
 
     // Run the specific next-fit algorithm tests.

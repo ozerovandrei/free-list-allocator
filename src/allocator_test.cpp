@@ -219,6 +219,62 @@ void TestAllocator_common_5(Allocator& allocator) {
     std::cout << std::endl;
 }
 
+void TestAllocator_common_6(Allocator& allocator) {
+    std::string test_name = "TestAllocator_common_6";
+    bool fail = false;
+    PrintTestRunning(test_name, allocator);
+
+    auto block_1 = allocator.New(6);
+    auto block_2 = allocator.New(60);
+    auto block_3 = allocator.New(60);
+    auto block_1_header = GetHeader(block_1);
+    auto block_2_header = GetHeader(block_2);
+    auto block_3_header = GetHeader(block_3);
+
+    AssertUsedBlock(block_1_header, fail, test_name);
+    AssertUsedBlock(block_2_header, fail, test_name);
+    AssertUsedBlock(block_3_header, fail, test_name);
+    AssertAllocatedSize(block_1_header, 8, fail, test_name);
+    AssertAllocatedSize(block_2_header, 64, fail, test_name);
+    AssertAllocatedSize(block_3_header, 64, fail, test_name);
+
+    // Free big blocks.
+    allocator.Free(block_2);
+    allocator.Free(block_3);
+    AssertFreeBlock(block_2_header, fail, test_name);
+    AssertFreeBlock(block_3_header, fail, test_name);
+
+    // Allocate two smaller blocks and check that block_2 is reused and
+    // block_3 is not.
+    auto block_4 = allocator.New(31);
+    auto block_5 = allocator.New(30);
+    auto block_4_header = GetHeader(block_4);
+    auto block_5_header = GetHeader(block_5);
+
+    AssertAllocatedSize(block_4_header, 32, fail, test_name);
+    AssertAllocatedSize(block_5_header, 32, fail, test_name);
+
+    AssertUsedBlock(block_2_header, fail, test_name);
+    AssertFreeBlock(block_3_header, fail, test_name);
+    AssertBlocksEqual(block_2_header, block_4_header, fail, test_name);
+
+    // Allocate additional smaller block and check that it reused the block_3
+    // place.
+    auto block_6 = allocator.New(28);
+    auto block_6_header = GetHeader(block_6);
+
+    AssertAllocatedSize(block_6_header, 32, fail, test_name);
+
+    AssertUsedBlock(block_3_header, fail, test_name);
+    AssertBlocksEqual(block_3_header, block_6_header, fail, test_name);
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
+
 void TestAllocator_next_fit_1(Allocator& allocator) {
     std::string test_name = "TestAllocator_next_fit_1";
     bool fail = false;
