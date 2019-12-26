@@ -13,6 +13,7 @@ public:
     };
 
     Allocator(AllocationAlgorithm algorithm);
+    ~Allocator();
 
     static size_t Padding(size_t initial_size) noexcept;
     static size_t Align(size_t initial_size) noexcept;
@@ -40,12 +41,12 @@ private:
 
     // heap_start contains pointer to the start of the heap and it is only updated
     // on the very first allocation.
-    MemoryBlock *heap_start_ = nullptr;
+    MemoryBlock *heap_start_;
 
     // heap_end points to the current end of the heap and it's updated on the new
     // allocation from the OS.
-    MemoryBlock *heap_end_ = heap_start_;
+    MemoryBlock *heap_end_;
 
     // next_fit_start_block points to the block that should be used in the NextFit.
-    MemoryBlock *next_fit_start_block_ = heap_start_;
+    MemoryBlock *next_fit_start_block_;
 };

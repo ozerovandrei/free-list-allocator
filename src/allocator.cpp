@@ -10,7 +10,27 @@
 #include "../include/allocator.h"
 
 // Allocator constructor.
-Allocator::Allocator(AllocationAlgorithm algorithm) : algorithm_(algorithm) {}
+Allocator::Allocator(AllocationAlgorithm algorithm) :
+algorithm_(algorithm),
+heap_start_(nullptr) {
+    heap_end_ = heap_start_;
+    next_fit_start_block_ = heap_start_;
+}
+
+// Allocator destructor.
+Allocator::~Allocator() {
+    if (heap_start_ == nullptr) {
+        return;
+    }
+
+    // Reset the current allocation via brk: https://linux.die.net/man/2/brk
+    // https://stackoverflow.com/questions/6988487/what-does-the-brk-system-call-do
+    brk(heap_start_);
+
+    heap_start_ = nullptr;
+    heap_end_ = nullptr;
+    next_fit_start_block_ = nullptr;
+}
 
 // Padding calculates the size that is needed to align the provided initial
 // size with the machine word.
@@ -112,6 +132,7 @@ size_t Allocator::AllocSizeWithBlock(size_t size) noexcept {
 // can't be allocated (memory error).
 MemoryBlock *Allocator::NewFromOS(size_t size) noexcept {
     // Get the current heap end via sbrk: https://linux.die.net/man/2/sbrk
+    // https://stackoverflow.com/questions/6988487/what-does-the-brk-system-call-do
     auto memory_block = (MemoryBlock *)sbrk(0);
 
     // Memory error.
