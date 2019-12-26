@@ -104,6 +104,9 @@ size_t Allocator::Align(size_t initial_size) noexcept {
 
 // New allocates new block of memory from OS of at least needed_size bytes.
 MachineWord *Allocator::New(size_t needed_size) noexcept {
+    // Lock mutex.
+    std::lock_guard<std::mutex> lock(_mtx);
+
     auto size = Allocator::Align(needed_size);
     MemoryBlock *memory_block;
 
@@ -354,6 +357,9 @@ MemoryBlock *Allocator::MergeBlocks(MemoryBlock *block) noexcept {
 
 // Free deallocates previously created MemoryBlock.
 void Allocator::Free(MachineWord *data) noexcept {
+    // Lock mutex.
+    std::lock_guard<std::mutex> lock(_mtx);
+
     auto memory_block = GetHeader(data);
 
     // Merge the found block with the next one if next block is exist and it's

@@ -7,6 +7,8 @@
 
 class Allocator {
 public:
+    mutable std::mutex _mtx;
+
     enum class AllocationAlgorithm {
         FIRST_FIT,
         NEXT_FIT,
