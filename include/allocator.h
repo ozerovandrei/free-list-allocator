@@ -24,7 +24,9 @@ public:
     MemoryBlock *FindBlock(size_t size) noexcept;
 
     static MemoryBlock *NewFromOS(size_t size) noexcept;
+    static MemoryBlock *SplitBlock(MemoryBlock *block, size_t size) noexcept;
 
+    MemoryBlock *ListAllocate(MemoryBlock *block, size_t size) const noexcept;
     MemoryBlock *FirstFit(size_t size) const noexcept;
     MemoryBlock *NextFit(size_t size) noexcept;
     MemoryBlock *BestFit(size_t size) const noexcept;
