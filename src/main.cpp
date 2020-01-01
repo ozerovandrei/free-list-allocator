@@ -53,5 +53,11 @@ int main() {
         TestAllocator_next_fit_2(allocator);
     }
 
+    // Run the specific best-fit algorithm tests.
+    {
+        auto allocator = Allocator(Allocator::AllocationAlgorithm::BEST_FIT);
+        TestAllocator_best_fit_1(allocator);
+    }
+
     return 0;
 }

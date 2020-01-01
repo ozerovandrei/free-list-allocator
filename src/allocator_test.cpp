@@ -118,7 +118,7 @@ void TestAllocator_common_1(Allocator& allocator) {
     bool fail = false;
     PrintTestRunning(test_name, allocator);
 
-    auto block = allocator.New(3);
+    auto block = allocator.New(3); // 8
     auto block_header = GetHeader(block);
 
     AssertUsedBlock(block_header, fail, test_name);
@@ -154,7 +154,7 @@ void TestAllocator_common_3(Allocator& allocator) {
     bool fail = false;
     PrintTestRunning(test_name, allocator);
 
-    auto block = allocator.New(12);
+    auto block = allocator.New(12); // 16
     auto block_header = GetHeader(block);
 
     AssertUsedBlock(block_header, fail, test_name);
@@ -172,7 +172,7 @@ void TestAllocator_common_4(Allocator& allocator) {
     bool fail = false;
     PrintTestRunning(test_name, allocator);
 
-    auto block = allocator.New(12);
+    auto block = allocator.New(12); // 16
     auto block_header = GetHeader(block);
     allocator.Free(block);
 
@@ -190,8 +190,8 @@ void TestAllocator_common_5(Allocator& allocator) {
     bool fail = false;
     PrintTestRunning(test_name, allocator);
 
-    auto block_1 = allocator.New(12);
-    auto block_2 = allocator.New(6);
+    auto block_1 = allocator.New(12); // 16
+    auto block_2 = allocator.New(6);  // 8
     auto block_1_header = GetHeader(block_1);
     auto block_2_header = GetHeader(block_2);
 
@@ -224,9 +224,9 @@ void TestAllocator_common_6(Allocator& allocator) {
     bool fail = false;
     PrintTestRunning(test_name, allocator);
 
-    auto block_1 = allocator.New(6);
-    auto block_2 = allocator.New(60);
-    auto block_3 = allocator.New(60);
+    auto block_1 = allocator.New(6);  // 8
+    auto block_2 = allocator.New(60); // 64
+    auto block_3 = allocator.New(60); // 64
     auto block_1_header = GetHeader(block_1);
     auto block_2_header = GetHeader(block_2);
     auto block_3_header = GetHeader(block_3);
@@ -246,8 +246,8 @@ void TestAllocator_common_6(Allocator& allocator) {
 
     // Allocate two smaller blocks and check that block_2 is reused and
     // block_3 is not.
-    auto block_4 = allocator.New(31);
-    auto block_5 = allocator.New(30);
+    auto block_4 = allocator.New(31); // 32
+    auto block_5 = allocator.New(30); // 32
     auto block_4_header = GetHeader(block_4);
     auto block_5_header = GetHeader(block_5);
 
@@ -260,7 +260,7 @@ void TestAllocator_common_6(Allocator& allocator) {
 
     // Allocate additional smaller block and check that it reused the block_3
     // place.
-    auto block_6 = allocator.New(28);
+    auto block_6 = allocator.New(28); // 32
     auto block_6_header = GetHeader(block_6);
 
     AssertAllocatedSize(block_6_header, 32, fail, test_name);
@@ -367,6 +367,64 @@ void TestAllocator_next_fit_2(Allocator& allocator) {
     AssertUsedBlock(block_5_header, fail, test_name);
     AssertUsedBlock(block_7_header, fail, test_name);
     AssertBlocksEqual(block_5_header, block_7_header, fail, test_name);
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
+
+void TestAllocator_best_fit_1(Allocator& allocator) {
+    std::string test_name = "TestAllocator_best_fit_1";
+    bool fail = false;
+    PrintTestRunning(test_name, allocator);
+
+    auto block_1 = allocator.New(3);  // 8
+    auto block_2 = allocator.New(50); // 56
+    auto block_3 = allocator.New(10); // 16
+    auto block_4 = allocator.New(29); // 32
+
+    auto block_1_header = GetHeader(block_1);
+    auto block_2_header = GetHeader(block_2);
+    auto block_3_header = GetHeader(block_3);
+    auto block_4_header = GetHeader(block_4);
+
+    AssertUsedBlock(block_1_header, fail, test_name);
+    AssertUsedBlock(block_2_header, fail, test_name);
+    AssertUsedBlock(block_3_header, fail, test_name);
+    AssertUsedBlock(block_4_header, fail, test_name);
+    AssertAllocatedSize(block_1_header, 8, fail, test_name);
+    AssertAllocatedSize(block_2_header, 56, fail, test_name);
+    AssertAllocatedSize(block_3_header, 16, fail, test_name);
+    AssertAllocatedSize(block_4_header, 32, fail, test_name);
+
+    allocator.Free(block_4); // 32
+    allocator.Free(block_2); // 56
+    AssertFreeBlock(block_4_header, fail, test_name);
+    AssertFreeBlock(block_2_header, fail, test_name);
+
+    auto block_5 = allocator.New(32);
+    auto block_5_header = GetHeader(block_5);
+    AssertAllocatedSize(block_5_header, 32, fail, test_name);
+
+    // Check that block 4 is reused.
+    AssertUsedBlock(block_4_header, fail, test_name);
+    AssertUsedBlock(block_5_header, fail, test_name);
+    AssertBlocksEqual(block_4_header, block_5_header, fail, test_name);
+
+    // Reuse 56 bytes by splitting free block_2 by 16 and 32.
+    auto block_6 = allocator.New(15);
+    auto block_7 = allocator.New(30);
+    auto block_6_header = GetHeader(block_6);
+    auto block_7_header = GetHeader(block_7);
+    AssertAllocatedSize(block_6_header, 16, fail, test_name);
+    AssertAllocatedSize(block_7_header, 32, fail, test_name);
+
+    // Check that block_2 is reused by block_6.
+    AssertUsedBlock(block_6_header, fail, test_name);
+    AssertUsedBlock(block_2_header, fail, test_name);
+    AssertBlocksEqual(block_6_header, block_2_header, fail, test_name);
 
     if (!fail) {
         PrintTestPass(test_name);
