@@ -1,4 +1,5 @@
 #include "allocator_test.cpp"
+#include "allocator_benchmark.cpp"
 
 int main() {
     // Create aliases for enum values.
@@ -57,6 +58,20 @@ int main() {
     {
         auto allocator = Allocator(Allocator::AllocationAlgorithm::BEST_FIT);
         TestAllocator_best_fit_1(allocator);
+    }
+
+    // Run benchmarks.
+    {
+        auto allocator = Allocator(Allocator::AllocationAlgorithm::FIRST_FIT);
+        BenchmarkAllocate(allocator);
+    }
+    {
+        auto allocator = Allocator(Allocator::AllocationAlgorithm::NEXT_FIT);
+        BenchmarkAllocate(allocator);
+    }
+    {
+        auto allocator = Allocator(Allocator::AllocationAlgorithm::BEST_FIT);
+        BenchmarkAllocate(allocator);
     }
 
     return 0;
