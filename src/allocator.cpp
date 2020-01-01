@@ -387,7 +387,7 @@ void Allocator::Free(MachineWord *data) noexcept {
     // Merge the found block with the next one if next block is exist and it's
     // not used.
     if (memory_block->Next && !memory_block->Next->Used) {
-        MergeBlocks(memory_block);
+        memory_block = MergeBlocks(memory_block);
     }
 
     memory_block->Used = false;
