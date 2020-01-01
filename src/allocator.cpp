@@ -176,6 +176,20 @@ MemoryBlock *Allocator::SplitBlock(MemoryBlock *block, size_t size) noexcept {
     return block;
 }
 
+// MergeBlocks merges the selected block with the next one.
+MemoryBlock *Allocator::MergeBlocks(MemoryBlock *block) noexcept {
+    // Next block could be last allocated block - update that pointer.
+    if (block->Next == last_allocated_block_) {
+        last_allocated_block_ = block;
+    }
+
+    // Merge blocks.
+    block->Size += block->Next->Size;
+    block->Next = block->Next->Next;
+
+    return block;
+}
+
 // FindBlock searches for the next free block that can be used.
 // It uses different algorithm based on selected algorithm of the allocator.
 MemoryBlock *Allocator::FindBlock(size_t size) noexcept {
@@ -337,22 +351,30 @@ bestFitAllocate(n):
             bestSize <- size(curr)
 */
 MemoryBlock *Allocator::BestFit(size_t size) const noexcept {
-    // Not implemented.
-    return nullptr;
-}
+    auto memory_block = heap_start_;
+    MemoryBlock *best_block = nullptr;
 
-// MergeBlocks merges the selected block with the next one.
-MemoryBlock *Allocator::MergeBlocks(MemoryBlock *block) noexcept {
-    // Next block could be last allocated block - update that pointer.
-    if (block->Next == last_allocated_block_) {
-        last_allocated_block_ = block;
+    while (memory_block != nullptr) {
+        if (memory_block->Used || memory_block->Size < size) {
+            memory_block = memory_block->Next;
+            continue;
+        }
+
+        // Found a block with smaller size than best_block.
+        if (best_block == nullptr || memory_block->Size < best_block->Size) {
+            best_block = memory_block;
+        }
+
+        memory_block = memory_block->Next;
     }
 
-    // Merge blocks.
-    block->Size += block->Next->Size;
-    block->Next = block->Next->Next;
+    // Memory error.
+    if (best_block == nullptr) {
+        return nullptr;
+    }
 
-    return block;
+    // Found the needed block.
+    return ListAllocate(best_block, size);
 }
 
 // Free deallocates previously created MemoryBlock.

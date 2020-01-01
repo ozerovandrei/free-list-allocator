@@ -2,13 +2,14 @@
 
 int main() {
     // Create aliases for enum values.
-    Allocator::AllocationAlgorithm algorithms[2] = {
+    Allocator::AllocationAlgorithm algorithms[3] = {
         Allocator::AllocationAlgorithm::FIRST_FIT,
         Allocator::AllocationAlgorithm::NEXT_FIT,
+        Allocator::AllocationAlgorithm::BEST_FIT,
     };
 
     // Run common tests for all allocator algorithms.
-    for (auto i = 0; i < 2; ++i) {
+    for (auto i = 0; i < 3; ++i) {
         // Tests are running in different scope to check if we have any memory
         // errors in the allocator destructor.
         {
