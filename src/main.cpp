@@ -60,7 +60,7 @@ int main() {
         TestAllocator_best_fit_1(allocator);
     }
 
-    // Run benchmarks.
+    // Run allocation benchmarks.
     {
         auto allocator = Allocator(Allocator::AllocationAlgorithm::FIRST_FIT);
         BenchmarkAllocate(allocator);
@@ -72,6 +72,20 @@ int main() {
     {
         auto allocator = Allocator(Allocator::AllocationAlgorithm::BEST_FIT);
         BenchmarkAllocate(allocator);
+    }
+
+    // Run allocation and free benchmarks.
+    {
+        auto allocator = Allocator(Allocator::AllocationAlgorithm::FIRST_FIT);
+        BenchmarkAllocateFree(allocator);
+    }
+    {
+        auto allocator = Allocator(Allocator::AllocationAlgorithm::NEXT_FIT);
+        BenchmarkAllocateFree(allocator);
+    }
+    {
+        auto allocator = Allocator(Allocator::AllocationAlgorithm::BEST_FIT);
+        BenchmarkAllocateFree(allocator);
     }
 
     return 0;
