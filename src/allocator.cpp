@@ -162,32 +162,32 @@ MemoryBlock *Allocator::NewFromOS(size_t size) noexcept {
 
 // SplitBlock splits a big block of memory to retrieve smaller block of the
 // needed size.
-MemoryBlock *Allocator::SplitBlock(MemoryBlock *block, size_t size) noexcept {
+MemoryBlock *Allocator::SplitBlock(MemoryBlock *memory_block, size_t size) noexcept {
     // Block that is left after splitting.
-    auto left_part = (MemoryBlock *)((char *)block + AllocSizeWithBlock(size));
-    left_part->Size = block->Size - size;
+    auto left_part = (MemoryBlock *)((char *)memory_block + AllocSizeWithBlock(size));
+    left_part->Size = memory_block->Size - size;
     left_part->Used = false;
-    left_part->Next = block->Next;
+    left_part->Next = memory_block->Next;
 
     // Update current block and chain left part and block.
-    block->Size = size;
-    block->Next = left_part;
+    memory_block->Size = size;
+    memory_block->Next = left_part;
 
-    return block;
+    return memory_block;
 }
 
 // MergeBlocks merges the selected block with the next one.
-MemoryBlock *Allocator::MergeBlocks(MemoryBlock *block) noexcept {
+MemoryBlock *Allocator::MergeBlocks(MemoryBlock *memory_block) noexcept {
     // Next block could be last allocated block - update that pointer.
-    if (block->Next == last_allocated_block_) {
-        last_allocated_block_ = block;
+    if (memory_block->Next == last_allocated_block_) {
+        last_allocated_block_ = memory_block;
     }
 
     // Merge blocks.
-    block->Size += block->Next->Size;
-    block->Next = block->Next->Next;
+    memory_block->Size += memory_block->Next->Size;
+    memory_block->Next = memory_block->Next->Next;
 
-    return block;
+    return memory_block;
 }
 
 // FindBlock searches for the next free block that can be used.
@@ -205,18 +205,18 @@ MemoryBlock *Allocator::FindBlock(size_t size) noexcept {
 
 // ListAllocate implements common block allocation function.
 // It will try to split a free block if it's bigger than provided size.
-MemoryBlock *Allocator::ListAllocate(MemoryBlock *block, size_t size) const noexcept {
+MemoryBlock *Allocator::ListAllocate(MemoryBlock *memory_block, size_t size) const noexcept {
     // We can't split block if requested size is smaller than allocated size for
     // a new block.
-    if (sizeof(MemoryBlock) <= (AllocSizeWithBlock(block->Size) - size)) {
-        block = SplitBlock(block, size);
+    if (sizeof(MemoryBlock) <= (AllocSizeWithBlock(memory_block->Size) - size)) {
+        memory_block = SplitBlock(memory_block, size);
     }
 
     // Block is allocated and ready to use.
-    block->Used = true;
-    block->Size = size;
+    memory_block->Used = true;
+    memory_block->Size = size;
 
-    return block;
+    return memory_block;
 }
 
 /*
