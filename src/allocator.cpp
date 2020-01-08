@@ -10,7 +10,7 @@
 #include "../include/allocator.h"
 
 // Allocator constructor.
-Allocator::Allocator(AllocationAlgorithm algorithm) :
+Allocator::Allocator(AllocationAlgorithm algorithm) noexcept :
 algorithm_(algorithm),
 heap_start_(nullptr),
 heap_end_(heap_start_),
@@ -18,7 +18,7 @@ last_allocated_block_(heap_start_),
 next_fit_start_block_(heap_start_) {}
 
 // Allocator destructor.
-Allocator::~Allocator() {
+Allocator::~Allocator() noexcept {
     if (heap_start_ == nullptr) {
         return;
     }

@@ -16,8 +16,8 @@ public:
         BEST_FIT
     };
 
-    Allocator(AllocationAlgorithm algorithm);
-    ~Allocator();
+    Allocator(AllocationAlgorithm algorithm) noexcept;
+    ~Allocator() noexcept;
 
     std::string Algorithm() const noexcept;
 
