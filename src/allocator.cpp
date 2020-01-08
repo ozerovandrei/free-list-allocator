@@ -225,23 +225,24 @@ listAllocate(prev, curr, n):
     return result
 */
 MemoryBlock *Allocator::FirstFit(size_t size) const noexcept {
-    auto memory_block = heap_start_;
+    MemoryBlock *memory_block = nullptr;
 
-    while (memory_block != nullptr) {
-        if (memory_block->Used || memory_block->Size < size) {
-            memory_block = memory_block->Next;
-
-            // Check the next block.
-            continue;
+    for (memory_block = heap_start_; memory_block != nullptr; memory_block = memory_block->Next) {
+        // Found a free block with suitable size.
+        if (!(memory_block->Used) && memory_block->Size >= size) {
+            break;
         }
-
-        // Found the needed block.
-        ListAllocate(memory_block, size);
-
-        return memory_block;
     }
 
-    return nullptr;
+    // Memory error.
+    if (memory_block == nullptr) {
+        return nullptr;
+    }
+
+    // Allocate memory on the found block.
+    ListAllocate(memory_block, size);
+
+    return memory_block;
 }
 
 /*
