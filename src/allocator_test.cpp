@@ -245,6 +245,77 @@ void TestAllocator_common_6(Allocator& allocator) {
     std::cout << std::endl;
 }
 
+void TestAllocator_common_7(Allocator& allocator) {
+    std::string test_name = "TestAllocator_common_7";
+    bool fail = false;
+    PrintTestRunning(test_name, allocator);
+
+    int *i;
+    unsigned long *j;
+    signed long *k;
+    char *c;
+    bool *b;
+
+    auto i_block = allocator.New(sizeof(int));
+    auto j_block = allocator.New(sizeof(unsigned long));
+    auto k_block = allocator.New(sizeof(unsigned long long));
+    auto c_block = allocator.New(sizeof(char));
+    auto b_block = allocator.New(sizeof(bool));
+
+    i = (int *)GetHeader(i_block);
+    j = (unsigned long *)GetHeader(j_block);
+    k = (signed long *)GetHeader(k_block);
+    c = (char *)GetHeader(c_block);
+    b = (bool *)GetHeader(b_block);
+
+    AssertUsedBlock(GetHeader(i_block), fail, test_name);
+    AssertUsedBlock(GetHeader(j_block), fail, test_name);
+    AssertUsedBlock(GetHeader(k_block), fail, test_name);
+    AssertUsedBlock(GetHeader(c_block), fail, test_name);
+    AssertUsedBlock(GetHeader(b_block), fail, test_name);
+
+    *i = 20;
+    if (*i != 20) {
+        fail = true;
+        PrintTestFail(test_name);
+        std::cerr << "Expected to get 20 from i but got: " << *i << std::endl;
+    }
+
+    *j = 1'100'000'000'000'000'111;
+    if (*j != 1'100'000'000'000'000'111) {
+        fail = true;
+        PrintTestFail(test_name);
+        std::cerr << "Expected to get 1'100'000'000'000'000'111 from j but got: " << *j << std::endl;
+    }
+
+    *k = -9'100'000'000'000'000'000;
+    if (*k != -9'100'000'000'000'000'000) {
+        fail = true;
+        PrintTestFail(test_name);
+        std::cerr << "Expected to get -9'100'000'000'000'000'000 from k but got: " << *k << std::endl;
+    }
+
+    *c = 'Z';
+    if (*c != 'Z') {
+        fail = true;
+        PrintTestFail(test_name);
+        std::cerr << "Expected to get 'Z' from c but got: " << *c << std::endl;
+    }
+
+    *b = true;
+    if (*b != true) {
+        fail = true;
+        PrintTestFail(test_name);
+        std::cerr << "Expected to get true from b but got: " << *b << std::endl;
+    }
+
+    if (!fail) {
+        PrintTestPass(test_name);
+    }
+
+    std::cout << std::endl;
+}
+
 void TestAllocator_next_fit_1(Allocator& allocator) {
     std::string test_name = "TestAllocator_next_fit_1";
     bool fail = false;
