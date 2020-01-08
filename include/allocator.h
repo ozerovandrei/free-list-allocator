@@ -23,22 +23,7 @@ public:
 
     static size_t Align(size_t initial_size) noexcept;
 
-    static size_t AllocSizeWithBlock(size_t size) noexcept;
-
     MachineWord *New(size_t size) noexcept;
-    MemoryBlock *FindBlock(size_t size) noexcept;
-
-    static MemoryBlock *NewFromOS(size_t size) noexcept;
-
-    static void SplitBlock(MemoryBlock *memory_block, size_t size) noexcept;
-    void MergeBlocks(MemoryBlock *memory_block) noexcept;
-
-    void ListAllocate(MemoryBlock *memory_block, size_t size) const noexcept;
-
-    MemoryBlock *FirstFit(size_t size) const noexcept;
-    MemoryBlock *NextFit(size_t size) noexcept;
-    MemoryBlock *BestFit(size_t size) const noexcept;
-
     void Free(MachineWord *data) noexcept;
 
     // Disable move and copy semantics.
@@ -62,4 +47,19 @@ private:
 
     // next_fit_start_block points to the block that should be used in the NextFit.
     MemoryBlock *next_fit_start_block_;
+
+    static size_t AllocSizeWithBlock(size_t size) noexcept;
+
+    MemoryBlock *FindBlock(size_t size) noexcept;
+
+    static MemoryBlock *NewFromOS(size_t size) noexcept;
+
+    static void SplitBlock(MemoryBlock *memory_block, size_t size) noexcept;
+    void MergeBlocks(MemoryBlock *memory_block) noexcept;
+
+    void ListAllocate(MemoryBlock *memory_block, size_t size) const noexcept;
+
+    MemoryBlock *FirstFit(size_t size) const noexcept;
+    MemoryBlock *NextFit(size_t size) noexcept;
+    MemoryBlock *BestFit(size_t size) const noexcept;
 };
