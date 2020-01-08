@@ -333,21 +333,18 @@ bestFitAllocate(n):
             bestSize <- size(curr)
 */
 MemoryBlock *Allocator::BestFit(size_t size) const noexcept {
-    auto memory_block = heap_start_;
     MemoryBlock *best_block = nullptr;
 
-    while (memory_block != nullptr) {
+    for (auto memory_block = heap_start_; memory_block != nullptr; memory_block = memory_block->Next) {
+        // Block is used or it is too small.
         if (memory_block->Used || memory_block->Size < size) {
-            memory_block = memory_block->Next;
             continue;
         }
 
-        // Found a block with smaller size than best_block.
+        // Found a new best_block.
         if (best_block == nullptr || memory_block->Size < best_block->Size) {
             best_block = memory_block;
         }
-
-        memory_block = memory_block->Next;
     }
 
     // Memory error.
@@ -355,7 +352,7 @@ MemoryBlock *Allocator::BestFit(size_t size) const noexcept {
         return nullptr;
     }
 
-    // Found the needed block.
+    // Allocate memory on the needed block.
     ListAllocate(best_block, size);
 
     return best_block;
