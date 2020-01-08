@@ -12,11 +12,10 @@
 // Allocator constructor.
 Allocator::Allocator(AllocationAlgorithm algorithm) :
 algorithm_(algorithm),
-heap_start_(nullptr) {
-    heap_end_ = heap_start_;
-    last_allocated_block_ = heap_start_;
-    next_fit_start_block_ = heap_start_;
-}
+heap_start_(nullptr),
+heap_end_(heap_start_),
+last_allocated_block_(heap_start_),
+next_fit_start_block_(heap_start_) {}
 
 // Allocator destructor.
 Allocator::~Allocator() {
