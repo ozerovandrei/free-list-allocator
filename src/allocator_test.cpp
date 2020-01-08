@@ -17,36 +17,6 @@ void PrintTestFail(const std::string& test_name) {
     std::cerr << "--- FAIL: " << test_name << std::endl;
 }
 
-void TestPadding(const Allocator& allocator) {
-    std::string test_name = "TestPadding";
-    bool fail = false;
-    PrintTestRunning(test_name, allocator);
-
-    size_t initial_sizes[35] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-        15, 16, 21, 22, 23, 24, 32, 36, 40, 42, 47, 48, 60, 62, 63, 64, 65,
-        100, 101, 104};
-
-    size_t expected_padding[35] = {8, 7, 6, 5, 4, 3, 2, 1, 8, 7, 6, 5, 4, 3,
-        2, 1, 8, 3, 2, 1, 8, 8, 4, 8, 6, 1, 8, 4, 2, 1, 8, 7, 4, 3, 8};
-
-    for (auto i = 0; i < 35; ++i) {
-        auto actual = allocator.Padding(initial_sizes[i]);
-        if (expected_padding[i] != actual) {
-            fail = true;
-            PrintTestFail(test_name);
-            std::cerr << "Expected " << expected_padding[i]
-            << " from Padding(" << initial_sizes[i] << "), but got: "
-            << actual << std::endl;
-        }
-    }
-
-    if (!fail) {
-        PrintTestPass(test_name);
-    }
-
-    std::cout << std::endl;
-}
-
 void TestAlign(const Allocator& allocator) {
     std::string test_name = "TestAlign";
     bool fail = false;

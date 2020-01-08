@@ -15,7 +15,6 @@ int main() {
         // errors in the allocator destructor.
         {
             auto allocator = Allocator(algorithms[i]);
-            TestPadding(allocator);
             TestAlign(allocator);
         }
         {

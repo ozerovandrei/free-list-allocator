@@ -40,17 +40,6 @@ std::string Allocator::Algorithm() const noexcept {
     }
 }
 
-// Padding calculates the size that is needed to align the provided initial
-// size with the machine word.
-size_t Allocator::Padding(size_t initial_size) noexcept {
-    auto alignment = sizeof(MachineWord);
-
-    size_t multiplier = (initial_size / alignment) + 1;
-    size_t aligned_size = multiplier * alignment;
-
-    return aligned_size - initial_size;
-}
-
 // Align performs an alignment of the initial size to the machine word size.
 // Word size is usually 8 bytes on a 64 bit architecture.
 // Examples:
@@ -72,7 +61,9 @@ size_t Allocator::Align(size_t initial_size) noexcept {
     }
 
     // Calculate padding if initial size is bigger than machine word alignment.
-    auto padding = Allocator::Padding(initial_size);
+    size_t multiplier = (initial_size / alignment) + 1;
+    size_t aligned_size = multiplier * alignment;
+    size_t padding = aligned_size - initial_size;
 
     // Padding equals to initial size - we don't need to align it.
     if (padding == initial_size) {
@@ -83,7 +74,6 @@ size_t Allocator::Align(size_t initial_size) noexcept {
     // to the machine word.
     if (padding < initial_size) {
         auto difference = initial_size - padding;
-        auto alignment = sizeof(MachineWord);
 
         if (difference % alignment > 0) {
             return padding + initial_size;

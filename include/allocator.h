@@ -21,7 +21,6 @@ public:
 
     std::string Algorithm() const noexcept;
 
-    static size_t Padding(size_t initial_size) noexcept;
     static size_t Align(size_t initial_size) noexcept;
 
     static size_t AllocSizeWithBlock(size_t size) noexcept;
