@@ -26,11 +26,6 @@ Allocator::~Allocator() noexcept {
     // Reset the current allocation via brk: https://linux.die.net/man/2/brk
     // https://stackoverflow.com/questions/6988487/what-does-the-brk-system-call-do
     brk(heap_start_);
-
-    heap_start_ = nullptr;
-    heap_end_ = nullptr;
-    last_allocated_block_ = nullptr;
-    next_fit_start_block_ = nullptr;
 }
 
 // Return algorithm type.
