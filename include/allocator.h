@@ -29,11 +29,12 @@ public:
     MemoryBlock *FindBlock(size_t size) noexcept;
 
     static MemoryBlock *NewFromOS(size_t size) noexcept;
-    static MemoryBlock *SplitBlock(MemoryBlock *memory_block, size_t size) noexcept;
 
-    MemoryBlock *MergeBlocks(MemoryBlock *memory_block) noexcept;
+    static void SplitBlock(MemoryBlock *memory_block, size_t size) noexcept;
+    void MergeBlocks(MemoryBlock *memory_block) noexcept;
 
-    MemoryBlock *ListAllocate(MemoryBlock *memory_block, size_t size) const noexcept;
+    void ListAllocate(MemoryBlock *memory_block, size_t size) const noexcept;
+
     MemoryBlock *FirstFit(size_t size) const noexcept;
     MemoryBlock *NextFit(size_t size) noexcept;
     MemoryBlock *BestFit(size_t size) const noexcept;

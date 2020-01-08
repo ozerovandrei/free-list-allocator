@@ -146,7 +146,7 @@ MemoryBlock *Allocator::NewFromOS(size_t size) noexcept {
 
 // SplitBlock splits a big block of memory to retrieve smaller block of the
 // needed size.
-MemoryBlock *Allocator::SplitBlock(MemoryBlock *memory_block, size_t size) noexcept {
+void Allocator::SplitBlock(MemoryBlock *memory_block, size_t size) noexcept {
     // Block that is left after splitting.
     auto left_part = (MemoryBlock *)((char *)memory_block + AllocSizeWithBlock(size));
     left_part->Size = memory_block->Size - size;
@@ -156,12 +156,10 @@ MemoryBlock *Allocator::SplitBlock(MemoryBlock *memory_block, size_t size) noexc
     // Update current block and chain left part and block.
     memory_block->Size = size;
     memory_block->Next = left_part;
-
-    return memory_block;
 }
 
 // MergeBlocks merges the selected block with the next one.
-MemoryBlock *Allocator::MergeBlocks(MemoryBlock *memory_block) noexcept {
+void Allocator::MergeBlocks(MemoryBlock *memory_block) noexcept {
     // Next block could be last allocated block - update that pointer.
     if (memory_block->Next == last_allocated_block_) {
         last_allocated_block_ = memory_block;
@@ -170,8 +168,6 @@ MemoryBlock *Allocator::MergeBlocks(MemoryBlock *memory_block) noexcept {
     // Merge blocks.
     memory_block->Size += memory_block->Next->Size;
     memory_block->Next = memory_block->Next->Next;
-
-    return memory_block;
 }
 
 // FindBlock searches for the next free block that can be used.
@@ -189,18 +185,16 @@ MemoryBlock *Allocator::FindBlock(size_t size) noexcept {
 
 // ListAllocate implements common block allocation function.
 // It will try to split a free block if it's bigger than provided size.
-MemoryBlock *Allocator::ListAllocate(MemoryBlock *memory_block, size_t size) const noexcept {
+void Allocator::ListAllocate(MemoryBlock *memory_block, size_t size) const noexcept {
     // We can't split block if requested size is smaller than allocated size for
     // a new block.
     if (sizeof(MemoryBlock) <= (AllocSizeWithBlock(memory_block->Size) - size)) {
-        memory_block = SplitBlock(memory_block, size);
+        SplitBlock(memory_block, size);
     }
 
     // Block is allocated and ready to use.
     memory_block->Used = true;
     memory_block->Size = size;
-
-    return memory_block;
 }
 
 /*
@@ -242,7 +236,9 @@ MemoryBlock *Allocator::FirstFit(size_t size) const noexcept {
         }
 
         // Found the needed block.
-        return ListAllocate(memory_block, size);
+        ListAllocate(memory_block, size);
+
+        return memory_block;
     }
 
     return nullptr;
@@ -301,7 +297,9 @@ MemoryBlock *Allocator::NextFit(size_t size) noexcept {
 
         // Found the needed block.
         next_fit_start_block_ = memory_block;
-        return ListAllocate(memory_block, size);
+        ListAllocate(memory_block, size);
+
+        return memory_block;
     }
 
     return nullptr;
@@ -358,7 +356,9 @@ MemoryBlock *Allocator::BestFit(size_t size) const noexcept {
     }
 
     // Found the needed block.
-    return ListAllocate(best_block, size);
+    ListAllocate(best_block, size);
+
+    return best_block;
 }
 
 // Free deallocates previously created MemoryBlock.
@@ -371,7 +371,7 @@ void Allocator::Free(MachineWord *data) noexcept {
     // Merge the found block with the next one if next block is exist and it's
     // not used.
     if (memory_block->Next && !memory_block->Next->Used) {
-        memory_block = MergeBlocks(memory_block);
+        MergeBlocks(memory_block);
     }
 
     memory_block->Used = false;
