@@ -352,7 +352,7 @@ MemoryBlock *Allocator::BestFit(size_t size) const noexcept {
         return nullptr;
     }
 
-    // Allocate memory on the needed block.
+    // Allocate memory on the found block.
     ListAllocate(best_block, size);
 
     return best_block;
