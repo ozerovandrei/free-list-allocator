@@ -42,9 +42,6 @@ private:
     // allocation from the OS.
     MemoryBlock *heap_end_;
 
-    // last_allocated_block_ points to the last allocated block.
-    MemoryBlock *last_allocated_block_;
-
     // next_fit_start_block points to the block that should be used in the NextFit.
     MemoryBlock *next_fit_start_block_;
 

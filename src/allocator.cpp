@@ -14,7 +14,7 @@ Allocator::Allocator(AllocationAlgorithm algorithm) noexcept :
 algorithm_(algorithm),
 heap_start_(nullptr),
 heap_end_(heap_start_),
-last_allocated_block_(heap_start_),
+// last_allocated_block_(heap_start_),
 next_fit_start_block_(heap_start_) {}
 
 // Allocator destructor.
@@ -160,11 +160,6 @@ void Allocator::SplitBlock(MemoryBlock *memory_block, size_t size) noexcept {
 
 // MergeBlocks merges the selected block with the next one.
 void Allocator::MergeBlocks(MemoryBlock *memory_block) noexcept {
-    // Next block could be last allocated block - update that pointer.
-    if (memory_block->Next == last_allocated_block_) {
-        last_allocated_block_ = memory_block;
-    }
-
     // Merge blocks.
     memory_block->Size += memory_block->Next->Size;
     memory_block->Next = memory_block->Next->Next;
